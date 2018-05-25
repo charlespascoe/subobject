@@ -1,0 +1,26 @@
+{
+  "name": "subobject",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run clean && tsc --pretty --outDir ./dist/ || exit 0",
+    "watch": "npm run clean && tsc --pretty -w --outDir ./dist/",
+    "clean": "rm -rf ./dist/",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "npm run build && cp package.json dist/ && cp README.md dist/ && cp LICENSE dist/ && npm pack dist/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cpascoe95/subobject.git"
+  },
+  "author": "Charles Pascoe <charles@cpascoe.co.uk>",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/cpascoe95/subobject/issues"
+  },
+  "homepage": "https://github.com/cpascoe95/subobject#readme",
+  "devDependencies": {
+    "typescript": "2.8.3"
+  }
+}
