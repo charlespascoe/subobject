@@ -1,9 +1,84 @@
-import { tokenise } from '../../lib/internal/tokens';
+import { tokenise, nextToken } from '../../lib/internal/tokens';
 import { expect } from 'chai';
 import 'mocha';
 
 
-describe('tokenise', () => {
+describe('lib/internal/tokens:nextToken', () => {
+
+  it('should return null at the end of the pattern', () => {
+    expect(nextToken(0, '')).to.deep.equal({
+      nextPosition: 0,
+      token: null
+    });
+
+    expect(nextToken(1, 'a')).to.deep.equal({
+      nextPosition: 1,
+      token: null
+    });
+  });
+
+  it('should correctly handle open object', () => {
+    expect(nextToken(0, '{')).to.deep.equal({
+      nextPosition: 1,
+      token: {type: 'start'}
+    });
+  });
+
+  it('should correctly handle close object', () => {
+    expect(nextToken(0, '}')).to.deep.equal({
+      nextPosition: 1,
+      token: {type: 'end'}
+    });
+  });
+
+  it('should correctly handle commas', () => {
+    expect(nextToken(0, ',')).to.deep.equal({
+      nextPosition: 1,
+      token: {type: 'comma'}
+    });
+  });
+
+  it('should correctly handle colons', () => {
+    expect(nextToken(0, ':')).to.deep.equal({
+      nextPosition: 1,
+      token: {type: 'colon'}
+    });
+  });
+
+  it('should correctly handle quoted text', () => {
+    expect(nextToken(0, '"some \\"quoted\\" text"')).to.deep.equal({
+      nextPosition: 22,
+      token: {type: 'text', text: 'some "quoted" text'}
+    });
+  });
+
+  it('should throw if there is no closing quote', () => {
+    expect(() => nextToken(0, '"no \\"closing\\" quote')).to.throw('Missing closing quote');
+  });
+
+  it('should correctly handle simple text', () => {
+    expect(nextToken(0, 'simpleText')).to.deep.equal({
+      nextPosition: 10,
+      token: {type: 'text', text: 'simpleText'}
+    });
+  });
+
+  it('should throw if there are invalid characters in simple key', () => {
+    expect(() => nextToken(0, '%bar')).to.throw('Unexpected character');
+  });
+
+  it('should return the correct token for a given position', () => {
+    expect(nextToken(4, 'foo,bar,baz')).to.deep.equal({
+      nextPosition: 7,
+      token: {type: 'text', text: 'bar'}
+    });
+  });
+
+});
+
+
+describe('lib/inernal/tokens:tokenise', () => {
+
   it('should correctly handle open/close object', () => {
     expect(tokenise('{}')).to.deep.equal([
       {type: 'start'},
@@ -11,52 +86,40 @@ describe('tokenise', () => {
     ]);
   });
 
+  it('should correctly handle colons', () => {
+    expect(tokenise(':::')).to.deep.equal([
+      {type: 'colon'},
+      {type: 'colon'},
+      {type: 'colon'}
+    ]);
+  });
+
+  it('should correctly handle commas', () => {
+    expect(tokenise(',,,')).to.deep.equal([
+      {type: 'comma'},
+      {type: 'comma'},
+      {type: 'comma'}
+    ]);
+  });
+
   it('should correctly handle simple keys', () => {
     expect(tokenise('simpleKey')).to.deep.equal([
       {
         type: 'text',
-        value: 'simpleKey',
-        followedByColon: false
-      }
-    ]);
-  });
-
-  it('should correctly handle colons on simple keys', () => {
-    expect(tokenise('simpleKey:')).to.deep.equal([
-      {
-        type: 'text',
-        value: 'simpleKey',
-        followedByColon: true
+        text: 'simpleKey',
       }
     ]);
   });
 
   it('should throw if there are invalid characters in simple key', () => {
-    expect(() => tokenise('foo%bar')).to.throw('Invalid unquoted text');
-    expect(() => tokenise('foo%bar:')).to.throw('Invalid unquoted text');
-    expect(() => tokenise('foo%bar foo')).to.throw('Invalid unquoted text');
-  });
-
-  it('should throw if there are unexpected colons', () => {
-    expect(() => tokenise('foo::')).to.throw('Unexpected colon');
+    expect(() => tokenise('foo%bar')).to.throw('Unexpected character');
   });
 
   it('should correctly handle quoted keys', () => {
     expect(tokenise('"a \\"quoted\\" key"')).to.deep.equal([
       {
         type: 'text',
-        value: 'a "quoted" key',
-        followedByColon: false
-      }
-    ]);
-  });
-
-  it('should correctly handle colons on quoted keys', () => {
-    expect(tokenise('"a \\"quoted\\" key":')).to.deep.equal([
-      {
-        type: 'text',
-        value: 'a "quoted" key',
-        followedByColon: true
+        text: 'a "quoted" key'
       }
     ]);
   });
@@ -65,20 +128,20 @@ describe('tokenise', () => {
     expect(() => tokenise('"no \\"closing\\" quote')).to.throw('Missing closing quote');
   });
 
-  it('should correctly handle spaces between tokens', () => {
-    expect(tokenise('{ test: \n\t   text   }')).to.deep.equal([
+  it('should correctly handle whitespace between tokens', () => {
+    expect(tokenise('  { test: \n\t   text   }      ')).to.deep.equal([
       {type: 'start'},
       {
         type: 'text',
-        value: 'test',
-        followedByColon: true
+        text: 'test',
       },
+      {type: 'colon'},
       {
         type: 'text',
-        value: 'text',
-        followedByColon: false
+        text: 'text',
       },
       {type: 'end'}
     ]);
   });
+
 });
