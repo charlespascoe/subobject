@@ -2,10 +2,12 @@
   "compilerOptions": {
     "sourceMap": true,
     "declaration": true,
-    "baseUrl": "./lib/",
+    "baseUrl": ".",
     "paths": {
-      "subobject/*": ["*"]
+      "subobject": ["./lib/"],
+      "subobject/*": ["./lib/*"]
     },
+    "lib": ["ES6"],
     "target": "ES5",
     "strict": true
   },

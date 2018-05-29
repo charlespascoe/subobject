@@ -1,3 +1,6 @@
+import { ParsingError } from 'subobject/internal/errors';
+
+
 const closingQuoteRegex = /[^\\](\\{2})*"/;
 
 
@@ -79,7 +82,7 @@ export function nextToken(position: number, pattern: string): {nextPosition: num
     const closingQuoteMatch = pattern.slice(position).match(closingQuoteRegex);
 
     if (closingQuoteMatch === null || closingQuoteMatch.index === undefined) {
-      throw new Error('Missing closing quote');
+      throw new ParsingError(position, 1, 'Missing closing quote');
     }
 
     const closingIndex = closingQuoteMatch.index + closingQuoteMatch[0].length - 1;
@@ -97,7 +100,7 @@ export function nextToken(position: number, pattern: string): {nextPosition: num
   const simpleTextMatch = pattern.slice(position).match(simpleKeyPattern);
 
   if (simpleTextMatch === null || simpleTextMatch[0].length === 0) {
-    throw new Error('Unexpected character');
+    throw new ParsingError(position, 1, 'Unexpected character');
   }
 
   const simpleText = simpleTextMatch[0];
