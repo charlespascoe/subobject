@@ -20,35 +20,40 @@ describe('subobject/internal/tokens:nextToken', () => {
   it('should correctly handle open object', () => {
     expect(nextToken(0, '{')).to.deep.equal({
       nextPosition: 1,
-      token: {type: 'start'}
+      token: {type: 'start', position: 0, length: 1}
     });
   });
 
   it('should correctly handle close object', () => {
     expect(nextToken(0, '}')).to.deep.equal({
       nextPosition: 1,
-      token: {type: 'end'}
+      token: {type: 'end', position: 0, length: 1}
     });
   });
 
   it('should correctly handle commas', () => {
     expect(nextToken(0, ',')).to.deep.equal({
       nextPosition: 1,
-      token: {type: 'comma'}
+      token: {type: 'comma', position: 0, length: 1}
     });
   });
 
   it('should correctly handle colons', () => {
     expect(nextToken(0, ':')).to.deep.equal({
       nextPosition: 1,
-      token: {type: 'colon'}
+      token: {type: 'colon', position: 0, length: 1}
     });
   });
 
   it('should correctly handle quoted text', () => {
     expect(nextToken(0, '"some \\"quoted\\" text"')).to.deep.equal({
       nextPosition: 22,
-      token: {type: 'text', text: 'some "quoted" text'}
+      token: {
+        type: 'text',
+        text: 'some "quoted" text',
+        position: 0,
+        length: 22
+      }
     });
   });
 
@@ -59,7 +64,12 @@ describe('subobject/internal/tokens:nextToken', () => {
   it('should correctly handle simple text', () => {
     expect(nextToken(0, 'simpleText')).to.deep.equal({
       nextPosition: 10,
-      token: {type: 'text', text: 'simpleText'}
+      token: {
+        type: 'text',
+        text: 'simpleText',
+        position: 0,
+        length: 10
+      }
     });
   });
 
@@ -70,7 +80,12 @@ describe('subobject/internal/tokens:nextToken', () => {
   it('should return the correct token for a given position', () => {
     expect(nextToken(4, 'foo,bar,baz')).to.deep.equal({
       nextPosition: 7,
-      token: {type: 'text', text: 'bar'}
+      token: {
+        type: 'text',
+        text: 'bar',
+        position: 4,
+        length: 3
+      }
     });
   });
 
@@ -81,24 +96,24 @@ describe('subobject/inernal/tokens:tokenise', () => {
 
   it('should correctly handle open/close object', () => {
     expect(tokenise('{}')).to.deep.equal([
-      {type: 'start'},
-      {type: 'end'}
+      {type: 'start', position: 0, length: 1},
+      {type: 'end', position: 1, length: 1}
     ]);
   });
 
   it('should correctly handle colons', () => {
     expect(tokenise(':::')).to.deep.equal([
-      {type: 'colon'},
-      {type: 'colon'},
-      {type: 'colon'}
+      {type: 'colon', position: 0, length: 1},
+      {type: 'colon', position: 1, length: 1},
+      {type: 'colon', position: 2, length: 1}
     ]);
   });
 
   it('should correctly handle commas', () => {
     expect(tokenise(',,,')).to.deep.equal([
-      {type: 'comma'},
-      {type: 'comma'},
-      {type: 'comma'}
+      {type: 'comma', position: 0, length: 1},
+      {type: 'comma', position: 1, length: 1},
+      {type: 'comma', position: 2, length: 1}
     ]);
   });
 
@@ -107,6 +122,8 @@ describe('subobject/inernal/tokens:tokenise', () => {
       {
         type: 'text',
         text: 'simpleKey',
+        position: 0,
+        length: 9
       }
     ]);
   });
@@ -119,7 +136,9 @@ describe('subobject/inernal/tokens:tokenise', () => {
     expect(tokenise('"a \\"quoted\\" key"')).to.deep.equal([
       {
         type: 'text',
-        text: 'a "quoted" key'
+        text: 'a "quoted" key',
+        position: 0,
+        length: 18
       }
     ]);
   });
@@ -130,17 +149,21 @@ describe('subobject/inernal/tokens:tokenise', () => {
 
   it('should correctly handle whitespace between tokens', () => {
     expect(tokenise('  { test: \n\t   text   }      ')).to.deep.equal([
-      {type: 'start'},
+      {type: 'start', position: 2, length: 1},
       {
         type: 'text',
         text: 'test',
+        position: 4,
+        length: 4
       },
-      {type: 'colon'},
+      {type: 'colon', position: 8, length: 1},
       {
         type: 'text',
         text: 'text',
+        position: 15,
+        length: 4
       },
-      {type: 'end'}
+      {type: 'end', position: 22, length: 1}
     ]);
   });
 

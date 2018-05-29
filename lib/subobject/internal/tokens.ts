@@ -4,27 +4,32 @@ import { ParsingError } from 'subobject/internal/errors';
 const closingQuoteRegex = /[^\\](\\{2})*"/;
 
 
-export interface StartObjectToken {
+export interface BaseToken {
+  position: number;
+  length: number;
+}
+
+export interface StartObjectToken extends BaseToken {
   type: 'start';
 }
 
 
-export interface EndObjectToken {
+export interface EndObjectToken extends BaseToken {
   type: 'end';
 }
 
 
-export interface CommaToken {
+export interface CommaToken extends BaseToken {
   type: 'comma';
 }
 
 
-export interface ColonToken {
+export interface ColonToken extends BaseToken {
   type: 'colon';
 }
 
 
-export interface TextToken {
+export interface TextToken extends BaseToken {
   type: 'text';
   text: string;
 }
@@ -53,28 +58,44 @@ export function nextToken(position: number, pattern: string): {nextPosition: num
   if (character === '{') {
     return {
       nextPosition: position + 1,
-      token: {type: 'start'}
+      token: {
+        type: 'start',
+        position,
+        length: 1
+      }
     };
   }
 
   if (character === '}') {
     return {
       nextPosition: position + 1,
-      token: {type: 'end'}
+      token: {
+        type: 'end',
+        position,
+        length: 1
+      }
     };
   }
 
   if (character === ',') {
     return {
       nextPosition: position + 1,
-      token: {type: 'comma'}
+      token: {
+        type: 'comma',
+        position,
+        length: 1
+      }
     };
   }
 
   if (character === ':') {
     return {
       nextPosition: position + 1,
-      token: {type: 'colon'}
+      token: {
+        type: 'colon',
+        position,
+        length: 1
+      }
     };
   }
 
@@ -93,7 +114,12 @@ export function nextToken(position: number, pattern: string): {nextPosition: num
 
     return {
       nextPosition: closingIndex + 1,
-      token: {type: 'text', text: quotedString}
+      token: {
+        type: 'text',
+        text: quotedString,
+        position,
+        length: 1 + closingIndex - position
+      }
     };
   }
 
@@ -107,7 +133,12 @@ export function nextToken(position: number, pattern: string): {nextPosition: num
 
   return {
     nextPosition: position + simpleText.length,
-    token: {type: 'text', text: simpleTextMatch[0]}
+    token: {
+      type: 'text',
+      text: simpleTextMatch[0],
+      position,
+      length: simpleTextMatch[0].length
+    }
   };
 }
 
