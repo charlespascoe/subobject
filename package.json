@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run clean && tsc --pretty --outDir ./dist/ || exit 0",
-    "watch": "npm run clean && tsc --pretty -w --outDir ./dist/",
+    "build": "npm run clean && tsc --pretty -p tsconfig-build.json --outDir ./dist/ || exit 0",
     "clean": "rm -rf ./dist/",
-    "test": "mocha -r ts-node/register tests/*.spec.ts tests/**/*.spec.ts",
+    "test": "export NODE_PATH=\"$NODE_PATH:`pwd`/lib\" && mocha -r ts-node/register tests/*.spec.ts tests/**/*.spec.ts",
     "package": "npm run build && cp package.json dist/ && cp README.md dist/ && cp LICENSE dist/ && npm pack dist/"
   },
   "repository": {

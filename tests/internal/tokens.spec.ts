@@ -1,4 +1,4 @@
-import { tokenise, nextToken } from '../../lib/internal/tokens';
+import { tokenise, nextToken } from 'subobject/internal/tokens';
 import { expect } from 'chai';
 import 'mocha';
 
