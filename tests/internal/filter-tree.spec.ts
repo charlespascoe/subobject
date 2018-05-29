@@ -1,4 +1,9 @@
-import { findClosingBrace, readNextExpression, buildObjectFilterTree } from 'subobject/internal/filter-tree';
+import {
+  findClosingBrace,
+  readNextExpression,
+  buildObjectFilterTree,
+  buildRootObjectFilterTree
+} from 'subobject/internal/filter-tree';
 import { Token } from 'subobject/internal/tokens';
 import { expect } from 'chai';
 import 'mocha';
@@ -298,6 +303,116 @@ describe('subobject/internal/filter-tree:buildObjectFilterTree', () => {
         baz: true
       }
     });
+  });
+
+});
+
+
+describe('subobject/internal/filter-tree:buildRootObjectFilterTree', () => {
+
+  it('should throw if no tokens are given', () => {
+    const exception = expect(() => buildRootObjectFilterTree([])).to.throw('No input provided');
+    exception.has.property('position', 0);
+    exception.has.property('length', 0);
+  });
+
+  it('should throw if the first token isn\'t an opening brace', () => {
+    const tokens: Token[] = [
+      {
+        type: 'text',
+        text: 'foo',
+        position: 0,
+        length: 3
+      }
+    ];
+
+    const exception = expect(() => buildRootObjectFilterTree(tokens)).to.throw('Unexpected token (expected open brace)');
+    exception.has.property('position', 0);
+    exception.has.property('length', 3);
+  });
+
+  it('should throw if there is no closing brace', () => {
+    const tokens: Token[] = [
+      {
+        type: 'start',
+        position: 0,
+        length: 1
+      },
+      {
+        type: 'start',
+        position: 1,
+        length: 1
+      },
+      {
+        type: 'end',
+        position: 2,
+        length: 1
+      }
+    ];
+
+    const exception = expect(() => buildRootObjectFilterTree(tokens)).to.throw('Cannot find closing brace');
+    exception.has.property('position', 0);
+    exception.has.property('length', 1);
+  });
+
+  it('should throw if there is unexpected text after the object', () => {
+    const tokens: Token[] = [
+      {
+        type: 'start',
+        position: 0,
+        length: 1
+      },
+      {
+        type: 'text',
+        text: 'foo',
+        position: 1,
+        length: 3
+      },
+      {
+        type: 'end',
+        position: 4,
+        length: 1
+      },
+      {
+        type: 'colon',
+        position: 5,
+        length: 1
+      },
+      // Space
+      {
+        type: 'text',
+        text: 'foob',
+        position: 7,
+        length: 4
+      }
+    ];
+
+    const exception = expect(() => buildRootObjectFilterTree(tokens)).to.throw('Unexpected text after end of object');
+    exception.has.property('position', 5);
+    exception.has.property('length', 6);
+  });
+
+  it('should return the correct filter tree for valid input', () => {
+    const tokens: Token[] = [
+      {
+        type: 'start',
+        position: 0,
+        length: 1
+      },
+      {
+        type: 'text',
+        text: 'foo',
+        position: 1,
+        length: 3
+      },
+      {
+        type: 'end',
+        position: 4,
+        length: 1
+      }
+    ];
+
+    expect(buildRootObjectFilterTree(tokens)).to.deep.equal({foo: true});
   });
 
 });

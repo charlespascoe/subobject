@@ -106,3 +106,32 @@ export function buildObjectFilterTree(tokens: Token[]): FilterTree {
 
   return result;
 }
+
+
+export function buildRootObjectFilterTree(tokens: Token[]): FilterTree {
+  const openingBraceToken = getToken(tokens, 0);
+
+  if (openingBraceToken === null) {
+    throw new ParsingError(0, 0, 'No input provided');
+  }
+
+  if (openingBraceToken.type !== 'start') {
+    throw new ParsingError(openingBraceToken.position, openingBraceToken.length, 'Unexpected token (expected open brace)');
+  }
+
+  const closingBraceIndex = findClosingBrace(0, tokens);
+
+  if (closingBraceIndex === -1) {
+    throw new ParsingError(openingBraceToken.position, openingBraceToken.length, 'Cannot find closing brace');
+  }
+
+  if (closingBraceIndex !== tokens.length - 1) {
+    const unexpectedToken = tokens[closingBraceIndex + 1];
+    const lastToken = tokens[tokens.length - 1];
+    const unexpectedTextLength = (lastToken.position + lastToken.length) - unexpectedToken.position;
+
+    throw new ParsingError(unexpectedToken.position, unexpectedTextLength, 'Unexpected text after end of object');
+  }
+
+  return buildObjectFilterTree(tokens.slice(1, tokens.length - 1));
+}
