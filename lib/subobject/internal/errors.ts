@@ -1,5 +1,5 @@
-const ANSI_WHITE_BG_RED_FG = '\e[31;47m';
-const ANSI_COLOUR_RESET = '\e[0m';
+const ANSI_WHITE_BG_RED_FG_BOLD = '\x1B[31;47;1m';
+const ANSI_COLOUR_RESET = '\x1B[0m';
 
 
 export class ParsingError {
@@ -24,7 +24,7 @@ export class ParsingError {
     if (this.pattern === null) return '';
 
     return this.pattern.slice(0, this.position) +
-      ANSI_WHITE_BG_RED_FG +
+      ANSI_WHITE_BG_RED_FG_BOLD +
       this.pattern.slice(this.position, this.position + this.length) +
       ANSI_COLOUR_RESET +
       this.pattern.slice(this.position + this.length);
