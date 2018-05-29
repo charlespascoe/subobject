@@ -100,6 +100,16 @@ export function buildObjectFilterTree(tokens: Token[]): FilterTree {
 
   while (position < tokens.length) {
     const { nextPosition, filterTree } = readNextExpression(position, tokens);
+
+    // Note: readNextExpression only reads one expression,
+    // therefore at most one key will be on filterTree
+    for (const key in filterTree) {
+      if (result.hasOwnProperty(key)) {
+        const token = tokens[position];
+        throw new ParsingError(token.position, token.length, 'Duplicate key specified');
+      }
+    }
+
     position = nextPosition;
     result = {...result, ...filterTree};
   }

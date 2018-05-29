@@ -199,6 +199,7 @@ describe('subobject/internal/filter-tree:readNextExpression', () => {
 
 
 describe('subobject/internal/filter-tree:buildObjectFilterTree', () => {
+
   it('should return an empty filter tree for an empty array of tokens', () => {
     expect(buildObjectFilterTree([])).to.deep.equal({});
   });
@@ -303,6 +304,32 @@ describe('subobject/internal/filter-tree:buildObjectFilterTree', () => {
         baz: true
       }
     });
+  });
+
+  it('should throw when duplicate keys are specified', () => {
+    const tokens: Token[] = [
+      {
+        type: 'text',
+        text: 'foo',
+        position: 0,
+        length: 3
+      },
+      {
+        type: 'comma',
+        position: 3,
+        length: 1
+      },
+      {
+        type: 'text',
+        text: 'foo',
+        position: 4,
+        length: 3
+      }
+    ];
+
+    const exception = expect(() => buildObjectFilterTree(tokens)).to.throw('Duplicate key specified');
+    exception.has.property('position', 4);
+    exception.has.property('length', 3);
   });
 
 });
