@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import 'mocha';
 
 
-describe('lib/internal/tokens:nextToken', () => {
+describe('subobject/internal/tokens:nextToken', () => {
 
   it('should return null at the end of the pattern', () => {
     expect(nextToken(0, '')).to.deep.equal({
@@ -77,7 +77,7 @@ describe('lib/internal/tokens:nextToken', () => {
 });
 
 
-describe('lib/inernal/tokens:tokenise', () => {
+describe('subobject/inernal/tokens:tokenise', () => {
 
   it('should correctly handle open/close object', () => {
     expect(tokenise('{}')).to.deep.equal([
