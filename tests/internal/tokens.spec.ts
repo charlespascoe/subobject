@@ -57,6 +57,18 @@ describe('subobject/internal/tokens:nextToken', () => {
     });
   });
 
+  it('should correctly handle quoted text in an object', () => {
+    expect(nextToken(1, '{"some \\"quoted\\" text"}')).to.deep.equal({
+      nextPosition: 23,
+      token: {
+        type: 'text',
+        text: 'some "quoted" text',
+        position: 1,
+        length: 22
+      }
+    });
+  });
+
   it('should throw if there is no closing quote', () => {
     expect(() => nextToken(0, '"no \\"closing\\" quote')).to.throw('Missing closing quote');
   });

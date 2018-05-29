@@ -106,7 +106,7 @@ export function nextToken(position: number, pattern: string): {nextPosition: num
       throw new ParsingError(position, 1, 'Missing closing quote');
     }
 
-    const closingIndex = closingQuoteMatch.index + closingQuoteMatch[0].length - 1;
+    const closingIndex = position + closingQuoteMatch.index + closingQuoteMatch[0].length - 1;
 
     const quotedString = pattern.slice(position + 1, closingIndex)
       .replace(/\\"/g, '"')
