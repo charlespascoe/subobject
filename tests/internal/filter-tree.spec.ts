@@ -155,6 +155,49 @@ describe('subobject/internal/filter-tree:readNextExpression', () => {
     exception.has.property('length', 1);
   });
 
+  it('should throw when a comma is missing after an object between expressions', () => {
+    const tokens: Token[] = [
+      {
+        type: 'text',
+        text: 'test',
+        position: 0,
+        length: 4
+      },
+      {
+        type: 'colon',
+        position: 4,
+        length: 1
+      },
+      {
+        type: 'start',
+        position: 5,
+        length: 1
+      },
+      {
+        type: 'text',
+        text: 'foo',
+        position: 6,
+        length: 3
+      },
+      {
+        type: 'end',
+        position: 9,
+        length: 1
+      },
+      {
+        type: 'text',
+        text: 'foo',
+        position: 10,
+        length: 3
+      }
+    ];
+
+    const exception = expect(() => readNextExpression(0, tokens)).to.throw('Expected comma between expressions');
+
+    exception.has.property('position', 10);
+    exception.has.property('length', 3);
+  });
+
   it('should return the appropriate filter tree for nested objects', () => {
     const tokens: Token[] = [
       {

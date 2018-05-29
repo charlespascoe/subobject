@@ -72,20 +72,26 @@ export function readNextExpression(position: number, tokens: Token[]): {nextPosi
   if (nextToken.type === 'colon') {
     const openingBraceIndex = position + 2;
 
-    const nextNextToken = getToken(tokens, openingBraceIndex);
+    const openingBraceToken = getToken(tokens, openingBraceIndex);
 
-    if (nextNextToken === null || nextNextToken.type !== 'start') {
+    if (openingBraceToken === null || openingBraceToken.type !== 'start') {
       throw new ParsingError(nextToken.position, nextToken.length, 'Expected object after colon');
     }
 
     const closingBraceIndex = findClosingBrace(openingBraceIndex, tokens);
 
     if (closingBraceIndex === -1) {
-      throw new ParsingError(nextNextToken.position, nextNextToken.length, 'Missing closing brace');
+      throw new ParsingError(openingBraceToken.position, openingBraceToken.length, 'Missing closing brace');
+    }
+
+    const tokenAfterObject = getToken(tokens, closingBraceIndex + 1);
+
+    if (tokenAfterObject !== null && tokenAfterObject.type !== 'comma') {
+      throw new ParsingError(tokenAfterObject.position, tokenAfterObject.length, 'Expected comma between expressions');
     }
 
     return {
-      nextPosition: closingBraceIndex + 1,
+      nextPosition: closingBraceIndex + 1 + (tokenAfterObject === null ? 0 : 1),
       filterTree: {[key]: buildObjectFilterTree(tokens.slice(openingBraceIndex + 1, closingBraceIndex))}
     };
   }
