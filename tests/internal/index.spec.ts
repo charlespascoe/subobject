@@ -1,10 +1,10 @@
-import { filter } from 'subobject/internal/filter';
+import { filter } from 'subobject/internal';
 import { FilterTree } from 'subobject/internal/matcher-tree';
 import { expect } from 'chai';
 import 'mocha';
 
 
-describe('subobject/internal/filter:filter', () => {
+describe('subobject/internal:filter', () => {
   it('should return the input value for non-objects', () => {
     const filterTree: FilterTree = {foo: true};
 
