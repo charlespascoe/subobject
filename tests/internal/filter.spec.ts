@@ -83,4 +83,28 @@ describe('subobject/internal/filter:filter', () => {
 
     expect(filter(filterTree, input)).to.deep.equal(expected);
   });
+
+  it('should filter items of arrays', () => {
+    const filterTree: FilterTree = {
+      foo: {
+        bar: true
+      }
+    };
+
+    const input = {
+      foo: [
+        {bar: 123, baz: 'abc'},
+        {bar: 456, baz: 'def'},
+      ]
+    };
+
+    const expected = {
+      foo: [
+        {bar: 123},
+        {bar: 456}
+      ]
+    };
+
+    expect(filter(filterTree, input)).to.deep.equal(expected);
+  });
 });
