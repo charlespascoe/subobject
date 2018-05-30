@@ -1,5 +1,5 @@
 import { tokenise } from 'subobject/internal/tokens';
-import { buildRootObjectFilterTree } from 'subobject/internal/matcher-tree';
+import { buildRootObjectFilterTree } from 'subobject/internal/selector-tree';
 import { filter } from 'subobject/internal';
 import { ParsingError } from 'subobject/internal/errors';
 

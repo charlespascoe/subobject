@@ -3,13 +3,13 @@ import {
   readNextExpression,
   buildObjectFilterTree,
   buildRootObjectFilterTree
-} from 'subobject/internal/matcher-tree';
+} from 'subobject/internal/selector-tree';
 import { Token } from 'subobject/internal/tokens';
 import { expect } from 'chai';
 import 'mocha';
 
 
-describe('subobject/internal/matcher-tree:findClosingBrace', () => {
+describe('subobject/internal/selector-tree:findClosingBrace', () => {
 
   it('should return -1 when starting index is outside the array', () => {
     expect(findClosingBrace(1, [])).to.equal(-1);
@@ -55,7 +55,7 @@ describe('subobject/internal/matcher-tree:findClosingBrace', () => {
 });
 
 
-describe('subobject/internal/matcher-tree:readNextExpression', () => {
+describe('subobject/internal/selector-tree:readNextExpression', () => {
 
   it('should return an empty filter tree when 0 tokens are given', () => {
     expect(readNextExpression(0, [])).to.deep.equal({
@@ -241,7 +241,7 @@ describe('subobject/internal/matcher-tree:readNextExpression', () => {
 });
 
 
-describe('subobject/internal/matcher-tree:buildObjectFilterTree', () => {
+describe('subobject/internal/selector-tree:buildObjectFilterTree', () => {
 
   it('should return an empty filter tree for an empty array of tokens', () => {
     expect(buildObjectFilterTree([])).to.deep.equal({});
@@ -378,7 +378,7 @@ describe('subobject/internal/matcher-tree:buildObjectFilterTree', () => {
 });
 
 
-describe('subobject/internal/matcher-tree:buildRootObjectFilterTree', () => {
+describe('subobject/internal/selector-tree:buildRootObjectFilterTree', () => {
 
   it('should throw if no tokens are given', () => {
     const exception = expect(() => buildRootObjectFilterTree([])).to.throw('No input provided');

@@ -1,4 +1,4 @@
-import { FilterTree } from 'subobject/internal/matcher-tree';
+import { FilterTree } from 'subobject/internal/selector-tree';
 
 
 function filterValue(include: FilterTree | true, value: any): any {
