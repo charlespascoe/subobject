@@ -1,5 +1,5 @@
 import { filter } from 'subobject/internal/filter';
-import { FilterTree } from 'subobject/internal/filter-tree';
+import { FilterTree } from 'subobject/internal/matcher-tree';
 import { expect } from 'chai';
 import 'mocha';
 
