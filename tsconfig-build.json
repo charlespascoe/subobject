@@ -11,5 +11,5 @@
     "target": "ES5",
     "strict": true
   },
-  "include": ["./lib/subobject", "./tests"]
+  "include": ["./lib/subobject"]
 }
