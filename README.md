@@ -1,5 +1,9 @@
 # Subobject - pick a subset of keys from an object
 
+# Installation
+
+`$ npm install --save subobject`
+
 ## Usage
 
 ```ts
@@ -12,11 +16,14 @@ const user = {
     otherNames: 'Smith',
     role: {
         name: 'Admin',
-        canDeleteWidgets: true
+        permissions: [
+            {id: 1, 'CAN_CREATE_WIDGETS'},
+            {id: 2, 'CAN_DELETE_WIDGETS'},
+        ]
     }
 };
 
-const pickNames = subobject('{firstName,otherNames}');
+const pickNames = subobject('{firstName, otherNames}');
 
 console.log(pickNames(user));
 //{
@@ -24,16 +31,29 @@ console.log(pickNames(user));
 //    otherNames: 'Smith'
 //}
 
-const idAndRole = subojbect('{id, role: { name }}');
+const idAndRoleName = subojbect('{id, role: { name }}');
 
 console.log(idAndRole(user));
-{
-    id: 123,
-    role: {
-        name: 'Admin'
-    }
-}
+//{
+//    id: 123,
+//    role: {
+//        name: 'Admin'
+//    }
+//}
 
+const rolePermissions = subobject('{role: { name, permissions: { id }}}');
+
+// For arrays, the filter is applied to each item
+console.log(roleAndPermissions(user))
+//{
+//    role: {
+//        name: 'Admin',
+//        permissions: [
+//            {id: 1},
+//            {id: 2}
+//        ]
+//    }
+//}
 ```
 
 ## Syntax
