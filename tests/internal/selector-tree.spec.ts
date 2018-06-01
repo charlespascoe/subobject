@@ -1,8 +1,8 @@
 import {
   findClosingBrace,
   readNextExpression,
-  buildObjectFilterTree,
-  buildRootObjectFilterTree
+  buildObjectSelectors,
+  buildRootObjectSelectors
 } from 'subobject/internal/selector-tree';
 import { Token } from 'subobject/internal/tokens';
 import { expect } from 'chai';
@@ -57,10 +57,10 @@ describe('subobject/internal/selector-tree:findClosingBrace', () => {
 
 describe('subobject/internal/selector-tree:readNextExpression', () => {
 
-  it('should return an empty filter tree when 0 tokens are given', () => {
+  it('should return an empty selector tree when 0 tokens are given', () => {
     expect(readNextExpression(0, [])).to.deep.equal({
       nextPosition: 0,
-      filterTree: {}
+      selector: null
     });
   });
 
@@ -71,7 +71,7 @@ describe('subobject/internal/selector-tree:readNextExpression', () => {
     exception.has.property('length', 1);
   });
 
-  it('should return a filter tree with a text key', () => {
+  it('should return a selector tree with a text key', () => {
     const tokens: Token[] = [
       {
         type: 'text',
@@ -83,11 +83,11 @@ describe('subobject/internal/selector-tree:readNextExpression', () => {
 
     expect(readNextExpression(0, tokens)).to.deep.equal({
       nextPosition: 1,
-      filterTree: {test: true}
+      selector: {key: 'test'}
     });
   });
 
-  it('should return a filter tree with a text key, skipping commas', () => {
+  it('should return a selector tree with a text key, skipping commas', () => {
     const tokens: Token[] = [
       {
         type: 'text',
@@ -104,7 +104,7 @@ describe('subobject/internal/selector-tree:readNextExpression', () => {
 
     expect(readNextExpression(0, tokens)).to.deep.equal({
       nextPosition: 2,
-      filterTree: {test: true}
+      selector: {key: 'test'}
     });
   });
 
@@ -198,7 +198,7 @@ describe('subobject/internal/selector-tree:readNextExpression', () => {
     exception.has.property('length', 3);
   });
 
-  it('should return the appropriate filter tree for nested objects', () => {
+  it('should return the appropriate selector tree for nested objects', () => {
     const tokens: Token[] = [
       {
         type: 'text',
@@ -231,23 +231,26 @@ describe('subobject/internal/selector-tree:readNextExpression', () => {
 
     expect(readNextExpression(0, tokens)).to.deep.equal({
       nextPosition: 5,
-      filterTree: {
-        test: {
-          foo: true
-        }
+      selector: {
+        key: 'test',
+        children: [
+          {
+            key: 'foo'
+          }
+        ]
       }
     });
   });
 });
 
 
-describe('subobject/internal/selector-tree:buildObjectFilterTree', () => {
+describe('subobject/internal/selector-tree:buildObjectSelectors', () => {
 
-  it('should return an empty filter tree for an empty array of tokens', () => {
-    expect(buildObjectFilterTree([])).to.deep.equal({});
+  it('should return an empty selector tree for an empty array of tokens', () => {
+    expect(buildObjectSelectors([])).to.deep.equal([]);
   });
 
-  it('should return the correct filter tree for one key', () => {
+  it('should return the correct selector tree for one key', () => {
     const tokens: Token[] = [
       {
         type: 'text',
@@ -257,10 +260,10 @@ describe('subobject/internal/selector-tree:buildObjectFilterTree', () => {
       }
     ];
 
-    expect(buildObjectFilterTree(tokens)).to.deep.equal({test: true});
+    expect(buildObjectSelectors(tokens)).to.deep.equal([{key: 'test'}]);
   });
 
-  it('should return the correct filter tree for multiple keys', () => {
+  it('should return the correct selector tree for multiple keys', () => {
     const tokens: Token[] = [
       {
         type: 'text',
@@ -292,11 +295,11 @@ describe('subobject/internal/selector-tree:buildObjectFilterTree', () => {
       }
     ];
 
-    expect(buildObjectFilterTree(tokens)).to.deep.equal({
-      foo: true,
-      bar: true,
-      baz: true
-    });
+    expect(buildObjectSelectors(tokens)).to.deep.equal([
+      {key: 'foo'},
+      {key: 'bar'},
+      {key: 'baz'}
+    ]);
   });
 
   it('should correctly handle nested objects', () => {
@@ -341,12 +344,15 @@ describe('subobject/internal/selector-tree:buildObjectFilterTree', () => {
       }
     ];
 
-    expect(buildObjectFilterTree(tokens)).to.deep.equal({
-      foo: {
-        bar: true,
-        baz: true
+    expect(buildObjectSelectors(tokens)).to.deep.equal([
+      {
+        key: 'foo',
+        children: [
+          {key: 'bar'},
+          {key: 'baz'}
+        ]
       }
-    });
+    ]);
   });
 
   it('should throw when duplicate keys are specified', () => {
@@ -370,7 +376,7 @@ describe('subobject/internal/selector-tree:buildObjectFilterTree', () => {
       }
     ];
 
-    const exception = expect(() => buildObjectFilterTree(tokens)).to.throw('Duplicate key specified');
+    const exception = expect(() => buildObjectSelectors(tokens)).to.throw('Duplicate key specified');
     exception.has.property('position', 4);
     exception.has.property('length', 3);
   });
@@ -378,10 +384,10 @@ describe('subobject/internal/selector-tree:buildObjectFilterTree', () => {
 });
 
 
-describe('subobject/internal/selector-tree:buildRootObjectFilterTree', () => {
+describe('subobject/internal/selector-tree:buildRootObjectSelectors', () => {
 
   it('should throw if no tokens are given', () => {
-    const exception = expect(() => buildRootObjectFilterTree([])).to.throw('No input provided');
+    const exception = expect(() => buildRootObjectSelectors([])).to.throw('No input provided');
     exception.has.property('position', 0);
     exception.has.property('length', 0);
   });
@@ -396,7 +402,7 @@ describe('subobject/internal/selector-tree:buildRootObjectFilterTree', () => {
       }
     ];
 
-    const exception = expect(() => buildRootObjectFilterTree(tokens)).to.throw('Unexpected token (expected open brace)');
+    const exception = expect(() => buildRootObjectSelectors(tokens)).to.throw('Unexpected token (expected open brace)');
     exception.has.property('position', 0);
     exception.has.property('length', 3);
   });
@@ -420,7 +426,7 @@ describe('subobject/internal/selector-tree:buildRootObjectFilterTree', () => {
       }
     ];
 
-    const exception = expect(() => buildRootObjectFilterTree(tokens)).to.throw('Cannot find closing brace');
+    const exception = expect(() => buildRootObjectSelectors(tokens)).to.throw('Cannot find closing brace');
     exception.has.property('position', 0);
     exception.has.property('length', 1);
   });
@@ -457,12 +463,12 @@ describe('subobject/internal/selector-tree:buildRootObjectFilterTree', () => {
       }
     ];
 
-    const exception = expect(() => buildRootObjectFilterTree(tokens)).to.throw('Unexpected text after end of object');
+    const exception = expect(() => buildRootObjectSelectors(tokens)).to.throw('Unexpected text after end of object');
     exception.has.property('position', 5);
     exception.has.property('length', 6);
   });
 
-  it('should return the correct filter tree for valid input', () => {
+  it('should return the correct selector tree for valid input', () => {
     const tokens: Token[] = [
       {
         type: 'start',
@@ -482,7 +488,7 @@ describe('subobject/internal/selector-tree:buildRootObjectFilterTree', () => {
       }
     ];
 
-    expect(buildRootObjectFilterTree(tokens)).to.deep.equal({foo: true});
+    expect(buildRootObjectSelectors(tokens)).to.deep.equal([{key: 'foo'}]);
   });
 
 });

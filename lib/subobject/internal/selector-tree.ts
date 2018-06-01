@@ -2,7 +2,10 @@ import { Token } from 'subobject/internal/tokens';
 import { ParsingError } from 'subobject/internal/errors';
 
 
-export type FilterTree = {[key: string]: FilterTree | true};
+export interface Selector {
+  key: string;
+  children?: Selector[];
+}
 
 
 export function findClosingBrace(startIndex: number, tokens: Token[]): number {
@@ -37,13 +40,13 @@ function getToken(tokens: Token[], index: number): Token | null {
 }
 
 
-export function readNextExpression(position: number, tokens: Token[]): {nextPosition: number, filterTree: FilterTree} {
+export function readNextExpression(position: number, tokens: Token[]): {nextPosition: number, selector: Selector | null} {
   const token = getToken(tokens, position);
 
   if (token === null) {
     return {
       nextPosition: position,
-      filterTree: {}
+      selector: null
     };
   }
 
@@ -58,14 +61,14 @@ export function readNextExpression(position: number, tokens: Token[]): {nextPosi
   if (nextToken === null) {
     return {
       nextPosition: position + 1,
-      filterTree: {[key]: true}
+      selector: {key}
     };
   }
 
   if (nextToken.type === 'comma') {
     return {
       nextPosition: position + 2,
-      filterTree: {[key]: true}
+      selector: {key}
     };
   }
 
@@ -92,7 +95,10 @@ export function readNextExpression(position: number, tokens: Token[]): {nextPosi
 
     return {
       nextPosition: closingBraceIndex + 1 + (tokenAfterObject === null ? 0 : 1),
-      filterTree: {[key]: buildObjectFilterTree(tokens.slice(openingBraceIndex + 1, closingBraceIndex))}
+      selector: {
+        key,
+        children: buildObjectSelectors(tokens.slice(openingBraceIndex + 1, closingBraceIndex))
+      }
     };
   }
 
@@ -100,31 +106,33 @@ export function readNextExpression(position: number, tokens: Token[]): {nextPosi
 }
 
 
-export function buildObjectFilterTree(tokens: Token[]): FilterTree {
-  let result: FilterTree = {};
+export function buildObjectSelectors(tokens: Token[]): Selector[] {
+  const result: Selector[] = [];
+  const keysSoFar = new Set<string>();
   let position = 0;
 
   while (position < tokens.length) {
-    const { nextPosition, filterTree } = readNextExpression(position, tokens);
+    const { nextPosition, selector } = readNextExpression(position, tokens);
 
-    // Note: readNextExpression only reads one expression,
-    // therefore at most one key will be on filterTree
-    for (const key in filterTree) {
-      if (result.hasOwnProperty(key)) {
-        const token = tokens[position];
-        throw new ParsingError(token.position, token.length, 'Duplicate key specified');
-      }
+    if (selector === null) {
+      break;
+    }
+
+    if (keysSoFar.has(selector.key)) {
+      const token = tokens[position];
+      throw new ParsingError(token.position, token.length, 'Duplicate key specified');
     }
 
     position = nextPosition;
-    result = {...result, ...filterTree};
+    result.push(selector);
+    keysSoFar.add(selector.key);
   }
 
   return result;
 }
 
 
-export function buildRootObjectFilterTree(tokens: Token[]): FilterTree {
+export function buildRootObjectSelectors(tokens: Token[]): Selector[] {
   const openingBraceToken = getToken(tokens, 0);
 
   if (openingBraceToken === null) {
@@ -149,5 +157,5 @@ export function buildRootObjectFilterTree(tokens: Token[]): FilterTree {
     throw new ParsingError(unexpectedToken.position, unexpectedTextLength, 'Unexpected text after end of object');
   }
 
-  return buildObjectFilterTree(tokens.slice(1, tokens.length - 1));
+  return buildObjectSelectors(tokens.slice(1, tokens.length - 1));
 }

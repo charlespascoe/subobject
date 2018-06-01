@@ -1,41 +1,37 @@
-import { FilterTree } from 'subobject/internal/selector-tree';
+import { Selector } from 'subobject/internal/selector-tree';
 
 
-function filterValue(include: FilterTree | true, value: any): any {
-  if (!include) {
+function applyFilter(filter: Selector, value: any): any {
+  if (value === undefined) {
     return undefined;
   }
 
-  if (typeof include === 'object') {
-    if (value === undefined) {
-      return undefined;
-    } else if (value instanceof Array) {
-      return value.map(item => filter(include, item));
+  if (filter.children) {
+    const childFilters = filter.children;
+
+    if (value instanceof Array) {
+      return value.map(item => buildSubobject(childFilters, item));
     } else {
-      return filter(include, value)
+      return buildSubobject(childFilters, value);
     }
   }
 
-  if (value !== undefined) {
-    return value;
-  }
-
-  return undefined;
+  return value;
 }
 
 
-export function filter(filterTree: FilterTree, obj: any): any {
+export function buildSubobject(filters: Selector[], obj: any): any {
   if (!obj || typeof obj !== 'object') {
     return obj;
   }
 
   const newObject: any = {};
 
-  for (const key of Object.keys(filterTree)) {
-    const value = filterValue(filterTree[key], obj[key]);
+  for (const filter of filters) {
+    const value = applyFilter(filter, obj[filter.key]);
 
     if (value !== undefined) {
-      newObject[key] = value;
+      newObject[filter.key] = value;
     }
   }
 

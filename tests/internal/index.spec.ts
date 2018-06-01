@@ -1,14 +1,14 @@
-import { filter } from 'subobject/internal';
-import { FilterTree } from 'subobject/internal/selector-tree';
+import { buildSubobject } from 'subobject/internal';
+import { Selector } from 'subobject/internal/selector-tree';
 import { expect } from 'chai';
 import 'mocha';
 
 
-describe('subobject/internal:filter', () => {
+describe('subobject/internal:buildSubobject', () => {
   it('should return the input value for non-objects', () => {
-    const filterTree: FilterTree = {foo: true};
+    const selectors: Selector[] = [{key: 'foo'}];
 
-    const ident = (val: any) => expect(filter(filterTree, val)).to.equal(val);
+    const ident = (val: any) => expect(buildSubobject(selectors, val)).to.equal(val);
 
     ident(0);
     ident(1);
@@ -19,11 +19,11 @@ describe('subobject/internal:filter', () => {
     ident(false);
   });
 
-  it('should return a simplified object when given a shallow filter tree', () => {
-    const filterTree: FilterTree = {
-      foo: true,
-      bar: true
-    };
+  it('should return a simplified object when given shallow selectors', () => {
+    const selectors: Selector[] = [
+      {key: 'foo'},
+      {key: 'bar'}
+    ];
 
     const input = {
       foo: 123,
@@ -36,15 +36,18 @@ describe('subobject/internal:filter', () => {
       bar: 'abc'
     };
 
-    expect(filter(filterTree, input)).to.deep.equal(expected);
+    expect(buildSubobject(selectors, input)).to.deep.equal(expected);
   });
 
   it('should return a simplified object when given a deep filter tree', () => {
-    const filterTree: FilterTree = {
-      foo: {
-        bar: true
+    const selectors: Selector[] = [
+      {
+        key: 'foo',
+        children: [
+          {key: 'bar'}
+        ]
       }
-    };
+    ];
 
     const input = {
       foo: {
@@ -60,17 +63,20 @@ describe('subobject/internal:filter', () => {
       }
     };
 
-    expect(filter(filterTree, input)).to.deep.equal(expected);
+    expect(buildSubobject(selectors, input)).to.deep.equal(expected);
   });
 
   it('should not include missing keys', () => {
-    const filterTree: FilterTree = {
-      foo: true,
-      bar: true,
-      baz: {
-        blip: true
+    const selectors: Selector[] = [
+      {key: 'foo'},
+      {key: 'bar'},
+      {
+        key: 'baz',
+        children: [
+          {key: 'blip'}
+        ]
       }
-    };
+    ];
 
     const input = {
       foo: 123,
@@ -81,15 +87,18 @@ describe('subobject/internal:filter', () => {
       foo: 123
     };
 
-    expect(filter(filterTree, input)).to.deep.equal(expected);
+    expect(buildSubobject(selectors, input)).to.deep.equal(expected);
   });
 
   it('should filter items of arrays', () => {
-    const filterTree: FilterTree = {
-      foo: {
-        bar: true
+    const selectors: Selector[] = [
+      {
+        key: 'foo',
+        children: [
+          {key: 'bar'}
+        ]
       }
-    };
+    ];
 
     const input = {
       foo: [
@@ -105,6 +114,6 @@ describe('subobject/internal:filter', () => {
       ]
     };
 
-    expect(filter(filterTree, input)).to.deep.equal(expected);
+    expect(buildSubobject(selectors, input)).to.deep.equal(expected);
   });
 });

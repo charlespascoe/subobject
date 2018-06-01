@@ -1,6 +1,6 @@
 import { tokenise } from 'subobject/internal/tokens';
-import { buildRootObjectFilterTree } from 'subobject/internal/selector-tree';
-import { filter } from 'subobject/internal';
+import { buildRootObjectSelectors } from 'subobject/internal/selector-tree';
+import { buildSubobject } from 'subobject/internal';
 import { ParsingError } from 'subobject/internal/errors';
 
 export { ParsingError } from 'subobject/internal/errors';
@@ -10,9 +10,9 @@ export function subobject(pattern: string): (obj: any) => any {
   try {
     const tokens = tokenise(pattern);
 
-    const filterTree = buildRootObjectFilterTree(tokens);
+    const selectors = buildRootObjectSelectors(tokens);
 
-    return (obj) => filter(filterTree, obj);
+    return (obj) => buildSubobject(selectors, obj);
   } catch (err) {
     if (!(err instanceof ParsingError)) {
       throw err;
