@@ -7,13 +7,7 @@ function applyFilter(filter: Selector, value: any): any {
   }
 
   if (filter.children) {
-    const childFilters = filter.children;
-
-    if (value instanceof Array) {
-      return value.map(item => buildSubobject(childFilters, item));
-    } else {
-      return buildSubobject(childFilters, value);
-    }
+    return buildSubobject(filter.children, value);
   }
 
   return value;
@@ -23,6 +17,10 @@ function applyFilter(filter: Selector, value: any): any {
 export function buildSubobject(filters: Selector[], obj: any): any {
   if (!obj || typeof obj !== 'object') {
     return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => buildSubobject(filters, item));
   }
 
   const newObject: any = {};

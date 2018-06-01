@@ -116,4 +116,40 @@ describe('subobject/internal:buildSubobject', () => {
 
     expect(buildSubobject(selectors, input)).to.deep.equal(expected);
   });
+
+  it('should handle root arrays', () => {
+    const selectors: Selector[] = [
+      {key: 'foo'}
+    ];
+
+    const input = [
+      {foo: 123, bar: 'abc'},
+      {foo: 456, bar: 'def'}
+    ];
+
+    const expected = [
+      {foo: 123},
+      {foo: 456}
+    ];
+
+    expect(buildSubobject(selectors, input)).to.deep.equal(expected);
+  });
+
+  it('should handle nested arrays', () => {
+    const selectors: Selector[] = [
+      {key: 'foo'}
+    ];
+
+    const input = [
+      [{foo: 123, bar: 'abc'}],
+      [{foo: 456, bar: 'def'}]
+    ];
+
+    const expected = [
+      [{foo: 123}],
+      [{foo: 456}]
+    ];
+
+    expect(buildSubobject(selectors, input)).to.deep.equal(expected);
+  });
 });
