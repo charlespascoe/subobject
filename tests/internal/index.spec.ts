@@ -90,6 +90,21 @@ describe('subobject/internal:buildSubobject', () => {
     expect(buildSubobject(selectors, input)).to.deep.equal(expected);
   });
 
+  it('should ignore simple types', () => {
+    const selectors = [
+      {
+        key: 'foo',
+        children: [
+          {key: 'bar'}
+        ]
+      }
+    ];
+
+    expect(buildSubobject(selectors, {foo: 123})).to.deep.equal({foo: 123});
+    expect(buildSubobject(selectors, {foo: null})).to.deep.equal({foo: null});
+    expect(buildSubobject(selectors, {foo: 'test'})).to.deep.equal({foo: 'test'});
+  });
+
   it('should filter items of arrays', () => {
     const selectors: Selector[] = [
       {
