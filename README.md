@@ -1,6 +1,6 @@
 # Subobject - pick a subset of keys from an object
 
-# Installation
+Installation:
 
 `$ npm install --save subobject`
 
